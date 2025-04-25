@@ -7,8 +7,8 @@ st.set_page_config(page_title="Investor Dashboard", layout="wide")
 st.title("Investor Dashboard")
 
 # --- SUPABASE CONFIG ---
-SUPABASE_URL = "https://<YOUR-PROJECT-ID>.supabase.co"
-API_KEY = "YOUR-ANON-KEY"
+SUPABASE_URL = "https://znfwwcxskreqpuuenrxo.supabase.co"
+API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpuZnd3Y3hza3JlcXB1dWVucnhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU1NzkxNzUsImV4cCI6MjA2MTE1NTE3NX0.HeMRepQ8nwHyGDjJFl8kH7jnUsUFFHa-diKy37Mk_Co"
 
 headers = {
     "apikey": API_KEY,
