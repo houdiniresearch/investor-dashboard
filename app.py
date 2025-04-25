@@ -53,20 +53,6 @@ col3.metric("Avg. Retention", f"{df['presale_retention'].mean():.2f}%")
 
 st.markdown("---")
 
-# --- PIE CHART (Distribution) ---
-st.subheader("Token Distribution Overview")
-chart_data = pd.DataFrame({
-    'Category': ['Presale Distributed', 'Currently Held'],
-    'Amount': [df["presale_amount"].sum(), df["current_balance"].sum()]
-})
-
-fig, ax = plt.subplots()
-ax.pie(chart_data["Amount"], labels=chart_data["Category"], autopct="%1.1f%%", startangle=90)
-ax.axis("equal")
-st.pyplot(fig)
-
-st.markdown("---")
-
 # --- TABLE FORMAT ---
 df = df.rename(columns={
     "investor_name": "Investor",
