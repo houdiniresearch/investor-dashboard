@@ -3,8 +3,8 @@ import pandas as pd
 import requests
 
 # --- PAGE SETTINGS ---
-st.set_page_config(page_title="Investor Dashboard", layout="wide")
-st.markdown("<h1 style='text-align: center;'>Investor Dashboard</h1>", unsafe_allow_html=True)
+st.set_page_config(page_title="JuliaOS Investor Dashboard", layout="wide")
+st.markdown("<h1 style='text-align: center;'>JuliaOS Investor Dashboard</h1>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- SUPABASE CONFIG ---
@@ -18,7 +18,7 @@ headers = {
 
 # --- FETCH DATA ---
 response = requests.get(
-    f"{SUPABASE_URL}/rest/v1/current_holdings?select=investor_name,current_balance,presale_retention",
+    f"{SUPABASE_URL}/rest/v1/current_holdings?select=investor_name,current_balance,presale_retention,token_mint,investor_id",
     headers=headers
 )
 
@@ -26,34 +26,49 @@ if response.status_code != 200:
     st.error("Failed to fetch data from Supabase.")
     st.stop()
 
-data = response.json()
-df = pd.DataFrame(data)
+holdings = pd.DataFrame(response.json())
 
-# --- METRICS SECTION ---
-total_investors = len(df)
-avg_retention = df["presale_retention"].mean()
-total_tokens = df["current_balance"].sum()
+# Presale amounts tablosunu çek
+response2 = requests.get(
+    f"{SUPABASE_URL}/rest/v1/presale_amounts?select=investor_id,presale_amount",
+    headers=headers
+)
 
+if response2.status_code != 200:
+    st.error("Failed to fetch presale data from Supabase.")
+    st.stop()
+
+presale = pd.DataFrame(response2.json())
+
+# --- MERGE BOTH DATASETS ---
+df = holdings.merge(presale, on="investor_id", how="left")
+
+# --- METRICS ---
 col1, col2, col3 = st.columns(3)
-col1.metric("Total Investors", total_investors)
-col2.metric("Total Held Tokens", f"{total_tokens:,.2f}")
-col3.metric("Average Retention", f"{avg_retention:.2f}%")
+col1.metric("Total Investors", len(df))
+col2.metric("Total Held Tokens", f"{df['current_balance'].sum():,.2f}")
+col3.metric("Avg. Retention", f"{df['presale_retention'].mean():.2f}%")
 
 st.markdown("---")
 
 # --- TABLE ---
-st.subheader("Presale Token Holding Overview")
-
-styled_df = df.rename(columns={
+df = df.rename(columns={
     "investor_name": "Investor",
+    "presale_amount": "Presale Amount",
     "current_balance": "Current Balance",
     "presale_retention": "Presale Retention (%)"
-}).sort_values(by="Presale Retention (%)", ascending=False)
+})
+
+df = df.sort_values(by="Presale Retention (%)", ascending=False)
+
+st.subheader("Token Holding Overview")
 
 st.dataframe(
-    styled_df.style.format({
+    df[["Investor", "Presale Amount", "Current Balance", "Presale Retention (%)"]].style.format({
+        "Presale Amount": "{:,.2f}",
         "Current Balance": "{:,.2f}",
         "Presale Retention (%)": "{:.2f}"
     }).background_gradient(subset="Presale Retention (%)", cmap="YlGn")
 )
+
 
